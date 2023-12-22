@@ -66,7 +66,7 @@ function fluid_lib.buffer_accepts_fluid(pos, buffer, fluid)
 	for _,pf in pairs(bfdata.accepts) do
 		if pf == fluid then
 			return true
-		elseif pf:match("^group") and ele.helpers.get_item_group(fluid, pf:gsub("group:", "")) then
+		elseif pf:match("^group") and minetest.get_item_group(fluid, pf:gsub("group:", "")) > 0 then
 			return true
 		end
 	end
