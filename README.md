@@ -67,12 +67,11 @@ All numbers are in **milli-buckets** (1 bucket = 1000 mB).
 	* Registers a node that can transfer fluids. This is effectively a fluid duct.
 	* `duct_density` variable in nodedef determines the diameter of the duct (custom node_box is created).
 
-* `bucket.register_liquid(source, flowing, itemname, inventory_image, name, groups, force_renew)`
+* `fluid_lib.register_liquid(source, flowing, itemname, inventory_image, name, groups, force_renew)`
 	* Works exactly the same as the default `bucket` mod, except it adds callbacks to insert/take fluid from nodes.
 	* `inventory_image` can be a **ColorString**.
+	* (WIP) supports additional games: Minetest Game (default bucket mod), VoxeLibre (mcl_buckets)
 
 ## License
-### bucket
-See [bucket/license.txt](bucket/license.txt)
 ### fluid_lib
 See [LICENSE](LICENSE)
