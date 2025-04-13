@@ -168,7 +168,7 @@ end
 
 function fluid_tanks.register_tank(tankname, def)
 	local accepts  = def.accepts or true
-	local registry = fluid_lib.get_liquid_registry()
+	local registry = fluid_lib.get_liquid_list()
 
 	if not accepts then return end
 
@@ -201,8 +201,8 @@ function fluid_tanks.register_tank(tankname, def)
 
 	if accepts == true then
 		accepts = {}
-		for _,i in pairs(registry) do
-			accepts[#accepts + 1] = i.source
+		for i in pairs(registry) do
+			accepts[#accepts + 1] = i
 		end
 	end
 

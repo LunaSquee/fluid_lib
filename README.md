@@ -2,6 +2,8 @@
 This API adds support for `fluid_buffers` inside nodes. This means that nodes can contain fluid. Simple fluid transfer is also implemented in `fluid_transfer`.
 This mod implements [node_io](https://github.com/auouymous/node_io). Note that while it is recommended that you install this mod also, it is not required in order to function. **Enable ALL the mods provided by this "modpack"!**
 
+This mod also provides an attempt to unify bucket mods from different games, currently focused on Minetest Game and VoxeLibre.
+
 ## How to Use
 1. Add the node to the `fluid_container` group.
 2. Add the following to the node defintion:
@@ -71,6 +73,21 @@ All numbers are in **milli-buckets** (1 bucket = 1000 mB).
 	* Works exactly the same as the default `bucket` mod, except it adds callbacks to insert/take fluid from nodes.
 	* `inventory_image` can be a **ColorString**.
 	* (WIP) supports additional games: Minetest Game (default bucket mod), VoxeLibre (mcl_buckets)
+
+* `fluid_lib.get_empty_bucket()`
+  * Get the item name of an empty bucket
+
+* `fluid_lib.get_liquid_list()`
+  * Get the list of registered source nodes
+
+* `fluid_lib.get_flowing_for_source(source)`
+  * Get the flowing variant of a liquid
+
+* `fluid_lib.get_bucket_for_source(source)`
+  * Get the bucket item name for a source node
+
+* `fluid_lib.get_source_for_bucket(bucket)`
+  * Get the source node of a bucket
 
 ## License
 ### fluid_lib

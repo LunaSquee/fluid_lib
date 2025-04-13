@@ -2,7 +2,6 @@
 -- This hack overrides the Minetest Game buckets to work with the Node IO API
 -- Also translates fluid registrations to games other than MTG
 -- Copyright (c) 2025 Evert "Diamond" Prants <evert@lunasqu.ee>
-
 fluid_lib = rawget(_G, "fluid_lib") or {}
 
 local napi = minetest.get_modpath("node_io")
@@ -10,7 +9,67 @@ local mtg = minetest.get_modpath("default")
 local mcl = minetest.get_modpath("mcl_core")
 local bucketmod = minetest.get_modpath("bucket")
 
+function fluid_lib.get_empty_bucket()
+    if mcl ~= nil then return "mcl_buckets:bucket_empty" end
+
+    return "bucket:bucket_empty"
+end
+
+function fluid_lib.get_liquid_list()
+    local list = {}
+    if bucketmod ~= nil then
+        for source in pairs(bucket.liquids) do list[source] = 1 end
+    elseif mcl ~= nil then
+        for source in pairs(mcl_buckets.liquids) do list[source] = 1 end
+    end
+    return list
+end
+
+function fluid_lib.get_flowing_for_source(source)
+    if bucketmod ~= nil then return bucket.liquids[source].flowing end
+
+    local hack = source .. "_flowing"
+    if core.registered_nodes[hack] ~= nil then return hack end
+
+    return nil
+end
+
+function fluid_lib.get_bucket_for_source(source)
+    if bucketmod ~= nil and bucket.liquids[source] ~= nil then
+        return bucket.liquids[source].itemname
+    elseif mcl ~= nil and mcl_buckets.liquids[source] ~= nil then
+        return mcl_buckets.liquids[source].bucketname
+    end
+
+    return nil
+end
+
+function fluid_lib.get_source_for_bucket(bucket)
+    local found = nil
+
+    if bucketmod ~= nil then
+        for source, b in pairs(bucket.liquids) do
+            if b.itemname and b.itemname == bucket then
+                found = source
+                break
+            end
+        end
+    elseif mcl ~= nil then
+        for source, b in pairs(mcl_buckets.liquids) do
+            if b.bucketname and b.bucketname == bucket then
+                found = source
+                break
+            end
+        end
+    end
+
+    return found
+end
+
 if mtg ~= nil and bucketmod ~= nil then
+    -- For compatibility with previous fluid_lib version
+    bucket.get_liquid_for_bucket = fluid_lib.get_source_for_bucket
+
     local function check_protection(pos, name, text)
         if minetest.is_protected(pos, name) then
             minetest.log("action",
@@ -69,7 +128,7 @@ if mtg ~= nil and bucketmod ~= nil then
                 -- Fill any fluid buffers if present
                 local place = true
                 local ppos = pointed_thing.under
-                local node = minetest.get_node(ppos)
+                local buffer_node = minetest.get_node(ppos)
 
                 -- Node IO Support
                 local usedef = ndef
@@ -83,12 +142,14 @@ if mtg ~= nil and bucketmod ~= nil then
                 end
 
                 if usedef[defpref .. 'can_put_liquid'] and
-                    usedef[defpref .. 'can_put_liquid'](ppos, node, lookat) then
-                    if usedef[defpref .. 'room_for_liquid'](ppos, node, lookat,
-                                                            source, 1000) >=
+                    usedef[defpref .. 'can_put_liquid'](ppos, buffer_node,
+                                                        lookat) then
+                    if usedef[defpref .. 'room_for_liquid'](ppos, buffer_node,
+                                                            lookat, source, 1000) >=
                         1000 then
-                        usedef[defpref .. 'put_liquid'](ppos, node, lookat,
-                                                        user, source, 1000)
+                        usedef[defpref .. 'put_liquid'](ppos, buffer_node,
+                                                        lookat, user, source,
+                                                        1000)
                         if ndef.on_timer then
                             minetest.get_node_timer(ppos):start(
                                 ndef.node_timer_seconds or 1.0)
@@ -115,7 +176,7 @@ if mtg ~= nil and bucketmod ~= nil then
     end
 
     core.override_item("bucket:bucket_empty", {
-        on_use = function(itemstack, user, pointed_thing)
+        on_use = function(_, user, pointed_thing)
             if pointed_thing.type == "object" then
                 pointed_thing.ref:punch(user, 1.0, {full_punch_interval = 1.0},
                                         nil)
@@ -222,7 +283,7 @@ if mtg ~= nil and bucketmod ~= nil then
                 end
 
                 if #buffers > 0 then
-                    for id, fluid in pairs(buffers) do
+                    for _, fluid in pairs(buffers) do
                         if fluid ~= "" then
                             local took =
                                 usedef[defpref .. 'take_liquid'](lpos, node,
@@ -287,11 +348,3 @@ function fluid_lib.register_liquid(source, flowing, itemname, inventory_image,
     end
 end
 
-function fluid_lib.get_liquid_registry()
-    if bucketmod ~= nil then
-        return bucket.liquids
-    elseif mcl ~= nil then
-        return mcl_buckets.liquids
-    end
-    return {}
-end

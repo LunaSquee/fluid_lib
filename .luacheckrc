@@ -74,7 +74,11 @@ globals = {
           "comma_value",
           "cleanse_node_name",
           "register_liquid",
-          "get_liquid_registry"
+          "get_empty_bucket",
+          "get_liquid_list",
+          "get_flowing_for_source",
+          "get_bucket_for_source",
+          "get_source_for_bucket"
       },
   },
   fluid_tanks = {
