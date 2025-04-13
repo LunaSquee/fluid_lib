@@ -44,19 +44,19 @@ function fluid_lib.get_bucket_for_source(source)
     return nil
 end
 
-function fluid_lib.get_source_for_bucket(bucket)
+function fluid_lib.get_source_for_bucket(itemname)
     local found = nil
 
     if bucketmod ~= nil then
         for source, b in pairs(bucket.liquids) do
-            if b.itemname and b.itemname == bucket then
+            if b.itemname and b.itemname == itemname then
                 found = source
                 break
             end
         end
     elseif mcl ~= nil then
         for source, b in pairs(mcl_buckets.liquids) do
-            if b.bucketname and b.bucketname == bucket then
+            if b.bucketname and b.bucketname == itemname then
                 found = source
                 break
             end
