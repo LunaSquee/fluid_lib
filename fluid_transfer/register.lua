@@ -30,6 +30,8 @@ minetest.register_node("fluid_transfer:fluid_trash", {
 	tiles = {"fluid_transfer_trash.png"},
 	use_texture_alpha = "clip",
 	groups = {oddly_breakable_by_hand = 1, cracky = 1, fluid_container = 1},
+	_mcl_blast_resistance = 1,
+	_mcl_hardness = 2,
 	node_io_can_put_liquid = function (pos, node, side)
 		return true
 	end,
