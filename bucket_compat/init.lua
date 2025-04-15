@@ -338,7 +338,45 @@ function fluid_lib.register_liquid(source, flowing, itemname, inventory_image,
             bucketname = itemname,
             inventory_image = inventory_image,
             name = name,
-            extra_check = function() end,
+            extra_check = function(pos, placer)
+                -- Fill any fluid buffers if present
+                local place = true
+                local ppos = vector.subtract(pos, vector.new(0, 1, 0))
+                local buffer_node = minetest.get_node(ppos)
+                local ndef = buffer_node and
+                                 minetest.registered_nodes[buffer_node.name]
+                core.debug("name " .. buffer_node.name)
+
+                -- Node IO Support
+                local usedef = ndef
+                local defpref = "node_io_"
+                local lookat = "N"
+
+                if napi then
+                    usedef = node_io
+                    lookat = node_io.get_pointed_side(user, pointed_thing)
+                    defpref = ""
+                end
+
+                if usedef[defpref .. 'can_put_liquid'] and
+                    usedef[defpref .. 'can_put_liquid'](ppos, buffer_node,
+                                                        lookat) then
+                    if usedef[defpref .. 'room_for_liquid'](ppos, buffer_node,
+                                                            lookat, source, 1000) >=
+                        1000 then
+                        usedef[defpref .. 'put_liquid'](ppos, buffer_node,
+                                                        lookat, user, source,
+                                                        1000)
+                        if ndef.on_timer then
+                            minetest.get_node_timer(ppos):start(
+                                ndef.node_timer_seconds or 1.0)
+                        end
+                        place = false
+                    end
+                end
+
+                return place, true
+            end,
             groups = groups,
             -- TODO: descriptions
             longdesc = "",
