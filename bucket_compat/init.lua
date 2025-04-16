@@ -350,11 +350,10 @@ function fluid_lib.register_liquid(source, flowing, itemname, inventory_image,
                 -- Node IO Support
                 local usedef = ndef
                 local defpref = "node_io_"
-                local lookat = "N"
+                local lookat = "U"
 
                 if napi then
                     usedef = node_io
-                    lookat = node_io.get_pointed_side(user, pointed_thing)
                     defpref = ""
                 end
 
@@ -365,7 +364,7 @@ function fluid_lib.register_liquid(source, flowing, itemname, inventory_image,
                                                             lookat, source, 1000) >=
                         1000 then
                         usedef[defpref .. 'put_liquid'](ppos, buffer_node,
-                                                        lookat, user, source,
+                                                        lookat, placer, source,
                                                         1000)
                         if ndef.on_timer then
                             minetest.get_node_timer(ppos):start(
