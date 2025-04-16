@@ -107,6 +107,12 @@ local function create_tank_node(tankname, def, fluid_name)
 		groups["not_in_creative_inventory"] = 1
 	end
 
+	if def.groups then
+		for k,v in pairs(def.groups) do
+			groups[k] = v
+		end
+	end
+
 	if minetest.registered_nodes[tankname] then
 		return
 	end
