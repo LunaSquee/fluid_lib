@@ -66,6 +66,66 @@ function fluid_lib.get_source_for_bucket(itemname)
     return found
 end
 
+-- function taken straight from mcl_buckets :P
+local function mcl_bucket_get_pointed_thing(user)
+    local start = user:get_pos()
+    start.y = start.y + user:get_properties().eye_height
+    local look_dir = user:get_look_dir()
+    local _end = vector.add(start, vector.multiply(look_dir, 5))
+
+    local ray = core.raycast(start, _end, false, true)
+    for pointed_thing in ray do
+        local name = core.get_node(pointed_thing.under).name
+        local def = core.registered_nodes[name]
+        if not def or def.drawtype ~= "flowingliquid" then
+            return pointed_thing
+        end
+    end
+end
+
+local function mcl_extra_check(pos, placer, source)
+    -- Fill any fluid buffers if present
+    local place = true
+    local ppos = vector.subtract(pos, vector.new(0, 1, 0))
+    local pointed_thing = nil
+    if placer then
+        pointed_thing = mcl_bucket_get_pointed_thing(placer)
+        if pointed_thing and pointed_thing.type == "node" then
+            ppos = pointed_thing.under
+        end
+    end
+    local buffer_node = minetest.get_node(ppos)
+    local ndef = buffer_node and core.registered_nodes[buffer_node.name]
+
+    -- Node IO Support
+    local usedef = ndef
+    local defpref = "node_io_"
+    local lookat = "U"
+
+    if napi then
+        usedef = node_io
+        lookat = pointed_thing and
+                     node_io.get_pointed_side(placer, pointed_thing) or lookat
+        defpref = ""
+    end
+
+    if usedef[defpref .. 'can_put_liquid'] and
+        usedef[defpref .. 'can_put_liquid'](ppos, buffer_node, lookat) then
+        if usedef[defpref .. 'room_for_liquid'](ppos, buffer_node, lookat,
+                                                source, 1000) >= 1000 then
+            usedef[defpref .. 'put_liquid'](ppos, buffer_node, lookat, placer,
+                                            source, 1000)
+            if ndef.on_timer then
+                minetest.get_node_timer(ppos):start(
+                    ndef.node_timer_seconds or 1.0)
+            end
+            place = false
+        end
+    end
+
+    return place, true
+end
+
 if mtg ~= nil and bucketmod ~= nil then
     -- For compatibility with previous fluid_lib version
     bucket.get_liquid_for_bucket = fluid_lib.get_source_for_bucket
@@ -315,6 +375,33 @@ if mtg ~= nil and bucketmod ~= nil then
     override_bucket("bucket:bucket_lava", "default:lava_source")
 end
 
+if mcl ~= nil then
+    local function override_bucket(item, source)
+        local original = mcl_buckets.buckets[item]
+        if not original then return end
+        local source_place = original.source_place
+        local original_extra_check = original.extra_check
+        original.extra_check = function(pos, placer)
+            local use_source = source
+            if source_place then
+                use_source = (type(source_place) == "function") and
+                                 source_place(pos) or source_place
+            end
+            local place, empty = mcl_extra_check(pos, placer, use_source)
+            if original_extra_check and place then
+                return original_extra_check(pos, placer)
+            end
+
+            return place, empty
+        end
+    end
+
+    override_bucket("mcl_buckets:bucket_lava", "mcl_core:lava_source")
+    override_bucket("mcl_buckets:bucket_water", "mcl_core:water_source")
+    override_bucket("mcl_buckets:bucket_river_water",
+                    "mclx_core:river_water_source")
+end
+
 function fluid_lib.register_liquid(source, flowing, itemname, inventory_image,
                                    name, groups, force_renew)
     if inventory_image:match("^#") then
@@ -339,42 +426,7 @@ function fluid_lib.register_liquid(source, flowing, itemname, inventory_image,
             inventory_image = inventory_image,
             name = name,
             extra_check = function(pos, placer)
-                -- Fill any fluid buffers if present
-                local place = true
-                local ppos = vector.subtract(pos, vector.new(0, 1, 0))
-                local buffer_node = minetest.get_node(ppos)
-                local ndef = buffer_node and
-                                 minetest.registered_nodes[buffer_node.name]
-                core.debug("name " .. buffer_node.name)
-
-                -- Node IO Support
-                local usedef = ndef
-                local defpref = "node_io_"
-                local lookat = "U"
-
-                if napi then
-                    usedef = node_io
-                    defpref = ""
-                end
-
-                if usedef[defpref .. 'can_put_liquid'] and
-                    usedef[defpref .. 'can_put_liquid'](ppos, buffer_node,
-                                                        lookat) then
-                    if usedef[defpref .. 'room_for_liquid'](ppos, buffer_node,
-                                                            lookat, source, 1000) >=
-                        1000 then
-                        usedef[defpref .. 'put_liquid'](ppos, buffer_node,
-                                                        lookat, placer, source,
-                                                        1000)
-                        if ndef.on_timer then
-                            minetest.get_node_timer(ppos):start(
-                                ndef.node_timer_seconds or 1.0)
-                        end
-                        place = false
-                    end
-                end
-
-                return place, true
+                return mcl_extra_check(pos, placer, source)
             end,
             groups = groups,
             -- TODO: descriptions
