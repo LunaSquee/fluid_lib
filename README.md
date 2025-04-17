@@ -72,7 +72,7 @@ All numbers are in **milli-buckets** (1 bucket = 1000 mB).
 * `fluid_lib.register_liquid(source, flowing, itemname, inventory_image, name, groups, force_renew)`
 	* Works exactly the same as the default `bucket` mod, except it adds callbacks to insert/take fluid from nodes.
 	* `inventory_image` can be a **ColorString**.
-	* (WIP) supports additional games: Minetest Game (default bucket mod), VoxeLibre (mcl_buckets)
+	* Full shims included for the following games: Minetest Game (default bucket mod), VoxeLibre/Mineclonia (mcl_buckets)
 
 * `fluid_lib.get_empty_bucket()`
   * Get the item name of an empty bucket
