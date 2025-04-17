@@ -149,6 +149,20 @@ local function mcl_extra_check(pos, placer, source)
     return place, true
 end
 
+local function pick_inventory_image(inventory_image)
+    if inventory_image:match("^#") then
+        if mcl ~= nil then
+            inventory_image =
+                "mcl_buckets_bucket_compat.png^(mcl_buckets_mask.png^[multiply:" ..
+                    inventory_image .. ")"
+        else
+            inventory_image = "bucket.png^(bucket_mask.png^[multiply:" ..
+                                  inventory_image .. ")"
+        end
+    end
+    return inventory_image
+end
+
 if mtg ~= nil and bucketmod ~= nil then
     -- For compatibility with previous fluid_lib version
     bucket.get_liquid_for_bucket = fluid_lib.get_source_for_bucket
@@ -255,6 +269,7 @@ if mtg ~= nil and bucketmod ~= nil then
     local original_register = bucket.register_liquid
     function bucket.register_liquid(source, flowing, itemname, inventory_image,
                                     name, groups, force_renew)
+        inventory_image = pick_inventory_image(inventory_image)
         original_register(source, flowing, itemname, inventory_image, name,
                           groups, force_renew)
         override_bucket(itemname, source)
@@ -381,9 +396,7 @@ if mcl ~= nil then
 
         local new_stack = mcl_util.call_on_rightclick(itemstack, user,
                                                       pointed_thing)
-        if new_stack then
-            return new_stack
-        end
+        if new_stack then return new_stack end
 
         local player_name = user and user:get_name() or ""
         if core.is_protected(lpos, player_name) then
@@ -460,16 +473,8 @@ end
 
 function fluid_lib.register_liquid(source, flowing, itemname, inventory_image,
                                    name, groups, force_renew)
-    if inventory_image:match("^#") then
-        if mcl ~= nil then
-            inventory_image =
-                "mcl_buckets_bucket_compat.png^(mcl_buckets_mask.png^[multiply:" ..
-                    inventory_image .. ")"
-        else
-            inventory_image = "bucket.png^(bucket_mask.png^[multiply:" ..
-                                  inventory_image .. ")"
-        end
-    end
+
+    inventory_image = pick_inventory_image(inventory_image)
 
     if bucketmod ~= nil then
         bucket.register_liquid(source, flowing, itemname, inventory_image, name,
