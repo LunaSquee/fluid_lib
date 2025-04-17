@@ -66,7 +66,8 @@ function fluid_lib.get_source_for_bucket(itemname)
     return found
 end
 
--- function taken straight from mcl_buckets :P
+-- function taken straight from mcl_buckets because it is not exposed
+-- https://git.minetest.land/VoxeLibre/VoxeLibre/src/branch/master/mods/ITEMS/mcl_buckets/init.lua
 local function mcl_bucket_get_pointed_thing(user)
     local start = user:get_pos()
     start.y = start.y + user:get_properties().eye_height
@@ -79,6 +80,28 @@ local function mcl_bucket_get_pointed_thing(user)
         local def = core.registered_nodes[name]
         if not def or def.drawtype ~= "flowingliquid" then
             return pointed_thing
+        end
+    end
+end
+
+-- function taken straight from mcl_buckets because it is not exposed
+-- https://git.minetest.land/VoxeLibre/VoxeLibre/src/branch/master/mods/ITEMS/mcl_buckets/init.lua
+local function mcl_give_bucket(new_bucket, itemstack, user)
+    local inv = user:get_inventory()
+    if core.is_creative_enabled(user:get_player_name()) then
+        -- TODO: is a full bucket added if inv doesn't contain one?
+        return itemstack
+    else
+        if itemstack:get_count() == 1 then
+            return new_bucket
+        else
+            if inv:room_for_item("main", new_bucket) then
+                inv:add_item("main", new_bucket)
+            else
+                core.add_item(user:get_pos(), new_bucket)
+            end
+            itemstack:take_item()
+            return itemstack
         end
     end
 end
@@ -141,6 +164,8 @@ if mtg ~= nil and bucketmod ~= nil then
         end
         return false
     end
+
+    -- OVERRIDE DEFAULT MTG BUCKETS --
 
     local function override_bucket(itemname, source)
         core.override_item(itemname, {
@@ -236,71 +261,6 @@ if mtg ~= nil and bucketmod ~= nil then
     end
 
     core.override_item("bucket:bucket_empty", {
-        on_use = function(_, user, pointed_thing)
-            if pointed_thing.type == "object" then
-                pointed_thing.ref:punch(user, 1.0, {full_punch_interval = 1.0},
-                                        nil)
-                return user:get_wielded_item()
-            elseif pointed_thing.type ~= "node" then
-                -- do nothing if it's neither object nor node
-                return
-            end
-            -- Check if pointing to a liquid source
-            local node = minetest.get_node(pointed_thing.under)
-            local liquiddef = bucket.liquids[node.name]
-            local item_count = user:get_wielded_item():get_count()
-
-            if liquiddef ~= nil and liquiddef.itemname ~= nil and node.name ==
-                liquiddef.source then
-                if check_protection(pointed_thing.under, user:get_player_name(),
-                                    "take " .. node.name) then
-                    return
-                end
-
-                -- default set to return filled bucket
-                local giving_back = liquiddef.itemname
-
-                -- check if holding more than 1 empty bucket
-                if item_count > 1 then
-
-                    -- if space in inventory add filled bucked, otherwise drop as item
-                    local inv = user:get_inventory()
-                    if inv:room_for_item("main", {name = liquiddef.itemname}) then
-                        inv:add_item("main", liquiddef.itemname)
-                    else
-                        local pos = user:getpos()
-                        pos.y = math.floor(pos.y + 0.5)
-                        minetest.add_item(pos, liquiddef.itemname)
-                    end
-
-                    -- set to return empty buckets minus 1
-                    giving_back = "bucket:bucket_empty " ..
-                                      tostring(item_count - 1)
-
-                end
-
-                -- force_renew requires a source neighbour
-                local source_neighbor = false
-                if liquiddef.force_renew then
-                    source_neighbor = minetest.find_node_near(
-                                          pointed_thing.under, 1,
-                                          liquiddef.source)
-                end
-                if not (source_neighbor and liquiddef.force_renew) then
-                    minetest.add_node(pointed_thing.under, {name = "air"})
-                end
-
-                return ItemStack(giving_back)
-            else
-                -- non-liquid nodes will have their on_punch triggered
-                local node_def = minetest.registered_nodes[node.name]
-                if node_def then
-                    node_def.on_punch(pointed_thing.under, node, user,
-                                      pointed_thing)
-                end
-                return user:get_wielded_item()
-            end
-        end,
         on_place = function(itemstack, user, pointed_thing)
             -- Must be pointing to node
             if pointed_thing.type ~= "node" then return end
@@ -376,6 +336,8 @@ if mtg ~= nil and bucketmod ~= nil then
 end
 
 if mcl ~= nil then
+    -- OVERRIDE DEFAULT VOXELIBRE BUCKETS --
+
     local function override_bucket(item, source)
         local original = mcl_buckets.buckets[item]
         if not original then return end
@@ -400,6 +362,96 @@ if mcl ~= nil then
     override_bucket("mcl_buckets:bucket_water", "mcl_core:water_source")
     override_bucket("mcl_buckets:bucket_river_water",
                     "mclx_core:river_water_source")
+
+    -- OVERRIDE EMPTY BUCKET --
+
+    local original_def = core.registered_items["mcl_buckets:bucket_empty"]
+    local original_on_place = original_def.on_place
+    local original_on_secondary_use = original_def.on_secondary_use
+    local function run_bucket_pickup(itemstack, user, pointed_thing,
+                                     original_function)
+        -- Must be pointing to node
+        if not pointed_thing or pointed_thing.type ~= "node" then
+            return itemstack
+        end
+
+        local lpos = pointed_thing.under
+        local node = minetest.get_node_or_nil(lpos)
+        local ndef = node and minetest.registered_nodes[node.name]
+
+        local new_stack = mcl_util.call_on_rightclick(itemstack, user,
+                                                      pointed_thing)
+
+        if core.is_protected(pos, player_name) then
+            core.record_protection_violation(pos, player_name)
+            return itemstack
+        end
+
+        -- Node IO Support
+        local usedef = ndef
+        local defpref = "node_io_"
+        local lookat = "N"
+
+        if napi then
+            usedef = node_io
+            lookat = node_io.get_pointed_side(user, pointed_thing)
+            defpref = ""
+        end
+
+        -- Remove fluid from buffers if present
+        local new_bucket = nil
+        if usedef[defpref .. 'can_take_liquid'] and
+            usedef[defpref .. 'can_take_liquid'](lpos, node, lookat) then
+            local bfc = usedef[defpref .. 'get_liquid_size'](lpos, node, lookat)
+            local buffers = {}
+            for i = 1, bfc do
+                buffers[i] = usedef[defpref .. 'get_liquid_name'](lpos, node,
+                                                                  lookat, i)
+            end
+
+            if #buffers > 0 then
+                for _, fluid in pairs(buffers) do
+                    if fluid ~= "" then
+                        local took = usedef[defpref .. 'take_liquid'](lpos,
+                                                                      node,
+                                                                      lookat,
+                                                                      user,
+                                                                      fluid,
+                                                                      1000)
+                        if took.millibuckets == 1000 and took.name == fluid then
+                            if mcl_buckets.liquids[fluid] then
+                                new_bucket = ItemStack(
+                                                 mcl_buckets.liquids[fluid]
+                                                     .bucketname)
+                                if ndef.on_timer then
+                                    minetest.get_node_timer(lpos):start(
+                                        ndef.node_timer_seconds or 1.0)
+                                end
+                                break
+                            end
+                        end
+                    end
+                end
+            end
+        end
+
+        if new_bucket then
+            return mcl_give_bucket(new_bucket, itemstack, user)
+        end
+
+        return original_function(itemstack, user, pointed_thing)
+    end
+
+    core.override_item("mcl_buckets:bucket_empty", {
+        on_place = function(itemstack, user, pointed_thing)
+            return run_bucket_pickup(itemstack, user, pointed_thing,
+                                     original_on_place)
+        end,
+        on_secondary_use = function(itemstack, user, pointed_thing)
+            return run_bucket_pickup(itemstack, user, pointed_thing,
+                                     original_on_secondary_use)
+        end
+    })
 end
 
 function fluid_lib.register_liquid(source, flowing, itemname, inventory_image,
