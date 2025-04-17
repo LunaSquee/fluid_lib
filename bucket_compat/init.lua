@@ -381,9 +381,13 @@ if mcl ~= nil then
 
         local new_stack = mcl_util.call_on_rightclick(itemstack, user,
                                                       pointed_thing)
+        if new_stack then
+            return new_stack
+        end
 
-        if core.is_protected(pos, player_name) then
-            core.record_protection_violation(pos, player_name)
+        local player_name = user and user:get_name() or ""
+        if core.is_protected(lpos, player_name) then
+            core.record_protection_violation(lpos, player_name)
             return itemstack
         end
 
@@ -459,7 +463,7 @@ function fluid_lib.register_liquid(source, flowing, itemname, inventory_image,
     if inventory_image:match("^#") then
         if mcl ~= nil then
             inventory_image =
-                "mcl_buckets_bucket.png^(mcl_buckets_mask.png^[multiply:" ..
+                "mcl_buckets_bucket_compat.png^(mcl_buckets_mask.png^[multiply:" ..
                     inventory_image .. ")"
         else
             inventory_image = "bucket.png^(bucket_mask.png^[multiply:" ..

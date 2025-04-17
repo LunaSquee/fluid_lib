@@ -92,3 +92,6 @@ All numbers are in **milli-buckets** (1 bucket = 1000 mB).
 ## License
 ### fluid_lib
 See [LICENSE](LICENSE)
+
+### bucket_compat
+Contains assets and code snippets from [Minetest Game](https://github.com/luanti-org/minetest_game/tree/master/mods/bucket) and [VoxeLibre](https://git.minetest.land/VoxeLibre/VoxeLibre/src/branch/master/mods/ITEMS/mcl_buckets) to provide maximum compatibility with the fluid APIs.
