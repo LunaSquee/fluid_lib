@@ -9,6 +9,8 @@ local mtg = minetest.get_modpath("default")
 local mcl = minetest.get_modpath("mcl_core")
 local bucketmod = minetest.get_modpath("bucket")
 
+local local_registry = {}
+
 function fluid_lib.get_empty_bucket()
     if mcl ~= nil then return "mcl_buckets:bucket_empty" end
 
@@ -21,6 +23,8 @@ function fluid_lib.get_liquid_list()
         for source in pairs(bucket.liquids) do list[source] = 1 end
     elseif mcl ~= nil then
         for source in pairs(mcl_buckets.liquids) do list[source] = 1 end
+    else
+        for source in pairs(local_registry) do list[source] = 1 end
     end
     return list
 end
@@ -495,6 +499,12 @@ function fluid_lib.register_liquid(source, flowing, itemname, inventory_image,
             usagehelp = "",
             tt_help = ""
         })
+    else
+        local_registry[source] = {
+            source = source,
+            flowing = flowing,
+            name = name,
+        }
     end
 end
 
