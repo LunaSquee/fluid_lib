@@ -11,6 +11,9 @@ function fluid_lib.register_extractor_node(nodename, nodedef)
 	nodedef.paramtype2 = "facedir"
 	nodedef.legacy_facedir_simple = true
 
+	nodedef._mcl_blast_resistance = nodedef._mcl_blast_resistance or 1
+	nodedef._mcl_hardness = nodedef._mcl_hardness or 2
+
 	nodedef.on_timer = fluid_lib.transfer_timer_tick
 	nodedef.node_io_on_neighbor_update = function (pos, node, side)
 		local t = minetest.get_node_timer(pos)
@@ -53,6 +56,8 @@ function fluid_lib.register_transfer_node(nodename, nodedef)
 	end
 
 	nodedef.groups["fluid_transport"] = 1
+	nodedef._mcl_blast_resistance = nodedef._mcl_blast_resistance or 1
+	nodedef._mcl_hardness = nodedef._mcl_hardness or 2
 
 	-- Duct node density
 	local cd = 1/7

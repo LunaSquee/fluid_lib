@@ -107,6 +107,12 @@ local function create_tank_node(tankname, def, fluid_name)
 		groups["not_in_creative_inventory"] = 1
 	end
 
+	if def.groups then
+		for k,v in pairs(def.groups) do
+			groups[k] = v
+		end
+	end
+
 	if minetest.registered_nodes[tankname] then
 		return
 	end
@@ -168,6 +174,7 @@ end
 
 function fluid_tanks.register_tank(tankname, def)
 	local accepts  = def.accepts or true
+	local registry = fluid_lib.get_liquid_list()
 
 	if not accepts then return end
 
@@ -184,13 +191,13 @@ function fluid_tanks.register_tank(tankname, def)
 		for _,s in ipairs(accepts) do
 			if s:match("^group:") then
 				local grp = s:gsub("^(group:)", "")
-				for f in pairs(bucket.liquids) do
+				for f in pairs(registry) do
 					if minetest.get_item_group(f, grp) > 0 then
 						new_accepts[#new_accepts + 1] = f
 					end
 				end
 			else
-				if bucket.liquids[s] then
+				if registry[s] then
 					new_accepts[#new_accepts + 1] = s
 				end
 			end
@@ -200,8 +207,8 @@ function fluid_tanks.register_tank(tankname, def)
 
 	if accepts == true then
 		accepts = {}
-		for _,i in pairs(bucket.liquids) do
-			accepts[#accepts + 1] = i.source
+		for i in pairs(registry) do
+			accepts[#accepts + 1] = i
 		end
 	end
 
