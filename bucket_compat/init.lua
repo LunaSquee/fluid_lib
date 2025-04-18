@@ -167,7 +167,7 @@ local function pick_inventory_image(inventory_image)
     return inventory_image
 end
 
-if mtg ~= nil and bucketmod ~= nil then
+if bucketmod ~= nil then
     -- For compatibility with previous fluid_lib version
     bucket.get_liquid_for_bucket = fluid_lib.get_source_for_bucket
 
@@ -349,9 +349,11 @@ if mtg ~= nil and bucketmod ~= nil then
         end
     })
 
-    override_bucket("bucket:bucket_water", "default:water_source")
-    override_bucket("bucket:bucket_river_water", "default:river_water_source")
-    override_bucket("bucket:bucket_lava", "default:lava_source")
+    if mtg ~= nil then
+        override_bucket("bucket:bucket_water", "default:water_source")
+        override_bucket("bucket:bucket_river_water", "default:river_water_source")
+        override_bucket("bucket:bucket_lava", "default:lava_source")
+    end
 end
 
 if mcl ~= nil then
