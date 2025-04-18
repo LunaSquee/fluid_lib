@@ -8,19 +8,32 @@ local napi = minetest.get_modpath("node_io")
 local mtg = minetest.get_modpath("default")
 local mcl = minetest.get_modpath("mcl_core")
 local bucketmod = minetest.get_modpath("bucket")
+local mesecraft = minetest.get_modpath("mesecraft_bucket")
 
 local local_registry = {}
 
+local function get_bucket_global()
+    if bucketmod ~= nil then
+        return bucket
+    elseif mesecraft ~= nil then
+        return mesecraft_bucket
+    elseif mcl ~= nil then
+        return mcl_buckets
+    end
+end
+
 function fluid_lib.get_empty_bucket()
     if mcl ~= nil then return "mcl_buckets:bucket_empty" end
+    if mesecraft ~= nil then return "mesecraft_bucket:bucket_empty" end
 
     return "bucket:bucket_empty"
 end
 
 function fluid_lib.get_liquid_list()
     local list = {}
-    if bucketmod ~= nil then
-        for source in pairs(bucket.liquids) do list[source] = 1 end
+    if bucketmod ~= nil or mesecraft ~= nil then
+        local global_bucket = get_bucket_global()
+        for source in pairs(global_bucket.liquids) do list[source] = 1 end
     elseif mcl ~= nil then
         for source in pairs(mcl_buckets.liquids) do list[source] = 1 end
     else
@@ -30,7 +43,12 @@ function fluid_lib.get_liquid_list()
 end
 
 function fluid_lib.get_flowing_for_source(source)
-    if bucketmod ~= nil then return bucket.liquids[source].flowing end
+    if bucketmod ~= nil or mesecraft ~= nil then
+        local global_bucket = get_bucket_global()
+        if global_bucket.liquids[source] ~= nil then
+            return global_bucket.liquids[source].flowing
+        end
+    end
 
     local hack = source .. "_flowing"
     if core.registered_nodes[hack] ~= nil then return hack end
@@ -39,8 +57,11 @@ function fluid_lib.get_flowing_for_source(source)
 end
 
 function fluid_lib.get_bucket_for_source(source)
-    if bucketmod ~= nil and bucket.liquids[source] ~= nil then
-        return bucket.liquids[source].itemname
+    if bucketmod ~= nil or mesecraft ~= nil then
+        local global_bucket = get_bucket_global()
+        if global_bucket.liquids[source] ~= nil then
+            return global_bucket.liquids[source].bucketname
+        end
     elseif mcl ~= nil and mcl_buckets.liquids[source] ~= nil then
         return mcl_buckets.liquids[source].bucketname
     end
@@ -51,8 +72,9 @@ end
 function fluid_lib.get_source_for_bucket(itemname)
     local found = nil
 
-    if bucketmod ~= nil then
-        for _, b in pairs(bucket.liquids) do
+    if bucketmod ~= nil or mesecraft ~= nil then
+        local global_bucket = get_bucket_global()
+        for _, b in pairs(global_bucket.liquids) do
             if b.itemname and b.itemname == itemname then
                 found = b.source
                 break
@@ -167,9 +189,10 @@ local function pick_inventory_image(inventory_image)
     return inventory_image
 end
 
-if bucketmod ~= nil then
+if bucketmod ~= nil or mesecraft ~= nil then
     -- For compatibility with previous fluid_lib version
-    bucket.get_liquid_for_bucket = fluid_lib.get_source_for_bucket
+    local global_bucket = get_bucket_global()
+    global_bucket.get_liquid_for_bucket = fluid_lib.get_source_for_bucket
 
     local function check_protection(pos, name, text)
         if minetest.is_protected(pos, name) then
@@ -265,21 +288,22 @@ if bucketmod ~= nil then
                     minetest.set_node(lpos, {name = source})
                 end
 
-                return ItemStack("bucket:bucket_empty")
+                return ItemStack(fluid_lib.get_empty_bucket())
             end
         })
     end
 
-    local original_register = bucket.register_liquid
-    function bucket.register_liquid(source, flowing, itemname, inventory_image,
-                                    name, groups, force_renew)
+    local original_register = global_bucket.register_liquid
+    function global_bucket.register_liquid(source, flowing, itemname,
+                                           inventory_image, name, groups,
+                                           force_renew)
         inventory_image = pick_inventory_image(inventory_image)
         original_register(source, flowing, itemname, inventory_image, name,
                           groups, force_renew)
         override_bucket(itemname, source)
     end
 
-    core.override_item("bucket:bucket_empty", {
+    core.override_item(fluid_lib.get_empty_bucket(), {
         on_place = function(itemstack, user, pointed_thing)
             -- Must be pointing to node
             if pointed_thing.type ~= "node" then return end
@@ -329,9 +353,9 @@ if bucketmod ~= nil then
                                                                  lookat, user,
                                                                  fluid, 1000)
                             if took.millibuckets == 1000 and took.name == fluid then
-                                if bucket.liquids[fluid] then
+                                if global_bucket.liquids[fluid] then
                                     itemstack = ItemStack(
-                                                    bucket.liquids[fluid]
+                                                    global_bucket.liquids[fluid]
                                                         .itemname)
                                     if ndef.on_timer then
                                         minetest.get_node_timer(lpos):start(
@@ -349,9 +373,15 @@ if bucketmod ~= nil then
         end
     })
 
-    if mtg ~= nil then
+    if mesecraft ~= nil then
+        override_bucket("mesecraft_bucket:bucket_water", "default:water_source")
+        override_bucket("mesecraft_bucket:bucket_river_water",
+                        "default:river_water_source")
+        override_bucket("mesecraft_bucket:bucket_lava", "default:lava_source")
+    elseif mtg ~= nil then
         override_bucket("bucket:bucket_water", "default:water_source")
-        override_bucket("bucket:bucket_river_water", "default:river_water_source")
+        override_bucket("bucket:bucket_river_water",
+                        "default:river_water_source")
         override_bucket("bucket:bucket_lava", "default:lava_source")
     end
 end
@@ -482,9 +512,10 @@ function fluid_lib.register_liquid(source, flowing, itemname, inventory_image,
 
     inventory_image = pick_inventory_image(inventory_image)
 
-    if bucketmod ~= nil then
-        bucket.register_liquid(source, flowing, itemname, inventory_image, name,
-                               groups, force_renew)
+    if bucketmod ~= nil or mesecraft ~= nil then
+        local global_bucket = get_bucket_global()
+        global_bucket.register_liquid(source, flowing, itemname,
+                                      inventory_image, name, groups, force_renew)
     elseif mcl ~= nil then
         mcl_buckets.register_liquid({
             source_place = source,
@@ -505,7 +536,7 @@ function fluid_lib.register_liquid(source, flowing, itemname, inventory_image,
         local_registry[source] = {
             source = source,
             flowing = flowing,
-            name = name,
+            name = name
         }
     end
 end

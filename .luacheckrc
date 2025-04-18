@@ -4,7 +4,7 @@ read_globals = {
     "minetest", "core",
     "dump", "dump2",
 
-    "mcl_buckets",
+    "mcl_util",
     "node_io",
 
     "Raycast",
@@ -53,6 +53,21 @@ globals = {
           "liquids",
           "get_liquid_for_bucket",
       }
+  },
+  mcl_buckets = {
+      fields = {
+          "register_liquid",
+          "buckets",
+          "liquids",
+          "get_liquid_for_bucket",
+      }
+  },
+  mesecraft_bucket = {
+    fields = {
+        "register_liquid",
+        "liquids",
+        "get_liquid_for_bucket",
+    }
   },
   fluid_lib = {
       fields = {
