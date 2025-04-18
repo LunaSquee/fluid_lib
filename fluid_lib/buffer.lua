@@ -1,14 +1,15 @@
 -- Fluid buffer support functions.
 
 local function node_data(pos)
-	local node    = minetest.get_node(pos)
+	local node    = minetest.get_node_or_nil(pos)
+	if not node then return nil end
 	local nodedef = minetest.registered_nodes[node.name]
 	return node, nodedef
 end
 
 function fluid_lib.get_node_buffers(pos)
 	local node, nodedef = node_data(pos)
-	if not nodedef['fluid_buffers'] then
+	if not node or not nodedef['fluid_buffers'] then
 		return nil
 	end
 
@@ -19,7 +20,7 @@ function fluid_lib.get_buffer_data(pos, buffer)
 	local node, nodedef = node_data(pos)
 	local buffers = fluid_lib.get_node_buffers(pos)
 
-	if not buffers[buffer] then
+	if not node or not buffers[buffer] then
 		return nil
 	end
 
