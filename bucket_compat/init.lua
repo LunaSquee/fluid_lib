@@ -182,8 +182,9 @@ local function pick_inventory_image(inventory_image)
                 "mcl_buckets_bucket_compat.png^(mcl_buckets_mask.png^[multiply:" ..
                     inventory_image .. ")"
         elseif mesecraft ~= nil then
-            inventory_image = "mesecraft_bucket.png^(bucket_mask.png^[multiply:" ..
-                                  inventory_image .. ")"
+            inventory_image =
+                "mesecraft_bucket.png^(bucket_mask.png^[multiply:" ..
+                    inventory_image .. ")"
         else
             inventory_image = "bucket.png^(bucket_mask.png^[multiply:" ..
                                   inventory_image .. ")"
@@ -543,4 +544,3 @@ function fluid_lib.register_liquid(source, flowing, itemname, inventory_image,
         }
     end
 end
-
