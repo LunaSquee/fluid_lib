@@ -437,8 +437,7 @@ if mcl ~= nil then
         local new_stack = mcl_util.call_on_rightclick(itemstack, user,
                                                       pointed_thing)
         if new_stack then return new_stack end
-
-        local player_name = user and user:get_name() or ""
+        local player_name = user and user:get_player_name() or ""
         if core.is_protected(lpos, player_name) then
             core.record_protection_violation(lpos, player_name)
             return itemstack
