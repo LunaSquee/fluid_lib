@@ -60,7 +60,7 @@ function fluid_lib.get_bucket_for_source(source)
     if bucketmod ~= nil or mesecraft ~= nil then
         local global_bucket = get_bucket_global()
         if global_bucket.liquids[source] ~= nil then
-            return global_bucket.liquids[source].bucketname
+            return global_bucket.liquids[source].itemname
         end
     elseif mcl ~= nil and mcl_buckets.liquids[source] ~= nil then
         return mcl_buckets.liquids[source].bucketname
