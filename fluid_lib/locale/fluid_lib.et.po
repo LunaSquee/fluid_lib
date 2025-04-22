@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-04-22 20:49+0300\n"
-"PO-Revision-Date: 2025-04-22 20:53+0300\n"
+"PO-Revision-Date: 2025-04-22 21:02+0300\n"
 "Last-Translator: <evert@lunasqu.ee>\n"
 "Language-Team: Estonian <linux-ee@lists.eenet.ee>\n"
 "Language: et\n"
@@ -60,7 +60,7 @@ msgstr "Välja lülitatud"
 
 #: fluid_transfer/network.lua:235
 msgid "Pumped Max Volume"
-msgstr "Pumpasin maksimaalse volüümi"
+msgstr "Pumpasin maksimaalse mahu"
 
 #: fluid_transfer/network.lua:250
 msgid "Pumping"
