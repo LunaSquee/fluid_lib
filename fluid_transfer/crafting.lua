@@ -88,9 +88,9 @@ elseif mcl then
     minetest.register_craft({
         output = "fluid_transfer:fluid_trash",
         recipe = {
-            {"default:cobble", "default:cobble", "default:cobble"},
-            {"default:stone", fluid_lib.get_empty_bucket(), "default:stone"},
-            {"default:stone", "fluid_transfer:fluid_duct", "default:stone"}
+            {"mcl_core:cobble", "mcl_core:cobble", "mcl_core:cobble"},
+            {"mcl_core:stone", fluid_lib.get_empty_bucket(), "mcl_core:stone"},
+            {"mcl_core:stone", "fluid_transfer:fluid_duct", "mcl_core:stone"}
         }
     })
 end
