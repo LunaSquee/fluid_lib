@@ -18,8 +18,8 @@ if xcp then
         output = "fluid_transfer:fluid_transfer_pump",
         recipe = {
             {"", "fluid_transfer:fluid_duct", ""},
-            {materials.glass, xcompat.mese_crystal, materials.glass},
-            {xcompat.stone, xcompat.stone, xcompat.stone}
+            {materials.glass, materials.mese_crystal, materials.glass},
+            {materials.stone, materials.stone, materials.stone}
         }
     })
 
@@ -27,9 +27,9 @@ if xcp then
     minetest.register_craft({
         output = "fluid_transfer:fluid_trash",
         recipe = {
-            {xcompat.cobble, xcompat.cobble, xcompat.cobble},
-            {xcompat.stone, fluid_lib.get_empty_bucket(), xcompat.stone},
-            {xcompat.stone, "fluid_transfer:fluid_duct", xcompat.stone}
+            {materials.cobble, materials.cobble, materials.cobble},
+            {materials.stone, fluid_lib.get_empty_bucket(), materials.stone},
+            {materials.stone, "fluid_transfer:fluid_duct", materials.stone}
         }
     })
 elseif mtg then
