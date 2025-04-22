@@ -1,6 +1,7 @@
+local S = core.get_translator("fluid_lib")
 
 fluid_lib.register_extractor_node("fluid_transfer:fluid_transfer_pump", {
-	description = "Fluid Transfer Pump\nPunch to start pumping",
+	description = S("Fluid Transfer Pump") .. "\n" .. S("Punch to start pumping"),
 	tiles = {"fluid_transfer_pump.png"},
 	use_texture_alpha = "clip",
 	drawtype = "mesh",
@@ -17,14 +18,14 @@ fluid_lib.register_extractor_node("fluid_transfer:fluid_transfer_pump", {
 })
 
 fluid_lib.register_transfer_node("fluid_transfer:fluid_duct", {
-	description = "Fluid Duct",
+	description = S("Fluid Duct"),
 	tiles = {"fluid_transfer_duct.png"},
 	use_texture_alpha = "clip",
 	groups = {oddly_breakable_by_hand = 1, cracky = 1}
 })
 
 minetest.register_node("fluid_transfer:fluid_trash", {
-	description = "Fluid Trash Can",
+	description = S("Fluid Trash Can"),
 	drawtype = "mesh",
 	mesh = "fluid_transfer_trash.obj",
 	tiles = {"fluid_transfer_trash.png"},

@@ -58,6 +58,10 @@ All numbers are in **milli-buckets** (1 bucket = 1000 mB).
 * `fluid_lib.take_from_buffer(pos, buffer, count)`
 	* Actually takes the fluid. On success, returns the source block that was taken and how much was actually taken.
 
+* `fluid_lib.buffer_to_string(buffer)`
+  * Returns textual representation of the buffer.
+  * Example: "Water (1,000 / 1,000 mB)"
+
 * `fluid_lib.register_node(nodename)`
 	* Registers a node that has fluid buffers. This is IMPORTANT!
 
@@ -88,6 +92,15 @@ All numbers are in **milli-buckets** (1 bucket = 1000 mB).
 
 * `fluid_lib.get_source_for_bucket(bucket)`
   * Get the source node of a bucket
+
+* `fluid_lib.cleanse_node_description(node)`
+  * Get the translated (if available) name of the fluid source node. If no translated variant is available, it just removes "Source" from the source description without applying a translation.
+
+* `fluid_lib.cleanse_node_name(node)`
+  * Get the technical name of the fluid source node without the name of the mod or "_source".
+
+* `fluid_lib.comma_value(n)`
+  * Add commas to thousands. (Example: 1000 -> 1,000)
 
 ## License
 ### fluid_lib

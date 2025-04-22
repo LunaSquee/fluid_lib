@@ -2,6 +2,7 @@
 -- Copyright (c) 2018 Evert "Diamond" Prants <evert@lunasqu.ee>
 
 local modpath = minetest.get_modpath(minetest.get_current_modname())
+local S = core.get_translator("fluid_lib")
 
 fluid_tanks = {}
 
@@ -18,7 +19,7 @@ local function preserve_metadata(pos, oldnode, oldmeta, drops)
 			local stack_meta = stack:get_meta()
 			stack_meta:set_int("fluid_storage", buffer.amount)
 			stack_meta:set_string("fluid", buffer.fluid)
-			stack_meta:set_string("description", ("%s\nContents: %s"):format(ndef.description,
+			stack_meta:set_string("description", ("%s\n" .. S("Contents") .. ": %s"):format(ndef.description,
 				fluid_lib.buffer_to_string(buffer)))
 
 			drops[i] = stack
@@ -33,7 +34,7 @@ local function after_place_node(pos, placer, itemstack, pointed_thing)
 	local item_meta = itemstack:get_meta()
 	local fluid_cnt = item_meta:get_int("fluid_storage")
 	local fluid     = item_meta:get_string("fluid")
-	
+
 	if fluid_cnt then
 		local meta = minetest.get_meta(pos)
 		meta:set_string("buffer_fluid", fluid)
@@ -81,7 +82,7 @@ local function tank_on_timer(pos, elapsed)
 	end
 
 	-- Update infotext
-	meta:set_string("infotext", ("%s\nContents: %s"):format(ndef.description,
+	meta:set_string("infotext", ("%s\n" .. S("Contents") .. ": %s"):format(ndef.description,
 		fluid_lib.buffer_to_string(buffer)))
 
 	local param2 = math.min(percentile * 63, 63)
@@ -95,11 +96,12 @@ local function tank_on_timer(pos, elapsed)
 end
 
 local function create_tank_node(tankname, def, fluid_name)
-	local capacity = def.capacity or 16000
-	local tiles    = def.tiles or {"default_glass.png", "default_glass_detail.png"}
-	local desc     = def.description
-	local srcnode  = def.srcnode or nil
-	local accepts  = def.accepts or true
+	local capacity   = def.capacity or 16000
+	local tiles      = def.tiles or {"default_glass.png", "default_glass_detail.png"}
+	local desc       = def.description
+	local empty_desc = def.empty_description or (S("Empty") .. " " .. desc)
+	local srcnode    = def.srcnode or nil
+	local accepts    = def.accepts or true
 
 	local groups = {cracky = 1, oddly_breakable_by_hand = 3, fluid_container = 1}
 
@@ -142,7 +144,7 @@ local function create_tank_node(tankname, def, fluid_name)
 		},
 		on_construct = function ( pos )
 			local meta = minetest.get_meta(pos)
-			meta:set_string("infotext", "Empty "..desc)
+			meta:set_string("infotext", empty_desc)
 		end,
 		on_timer = tank_on_timer,
 		groups = groups,

@@ -1,4 +1,6 @@
 local node_io_present = minetest.get_modpath("node_io") ~= nil
+local S = core.get_translator("fluid_lib")
+
 -- Network graphs are built eminating from provider nodes.
 -- TODO: Caching
 
@@ -124,7 +126,7 @@ end
 function fluid_lib.transfer_timer_tick(pos, elapsed)
 	local refresh = true
 	local node    = minetest.get_node_or_nil(pos)
-	local status  = "Fluid Pump"
+	local status  = S("Fluid Transfer Pump")
 	if not node then
 		return false
 	end
@@ -147,7 +149,7 @@ function fluid_lib.transfer_timer_tick(pos, elapsed)
 	targets = fluid_targets(pos, tpos)
 	-- No targets, don't proceed
 	if #targets == 0 then
-		meta:set_string("infotext", status.."\nNo Recieving Tank")
+		meta:set_string("infotext", status.."\n" .. S("No Receiving Tank"))
 		return true
 	end
 
@@ -157,7 +159,7 @@ function fluid_lib.transfer_timer_tick(pos, elapsed)
 
 	-- Make sure source node is not air
 	if not srcnode or srcnode.name == "air" then
-		meta:set_string("infotext", status.."\nNo Source Tank")
+		meta:set_string("infotext", status.."\n" .. S("No Source Tank"))
 		return true
 	end
 
@@ -165,14 +167,14 @@ function fluid_lib.transfer_timer_tick(pos, elapsed)
 
 	-- Make sure source node is a registered fluid container
 	if not srcdef or not srcdef['node_io_can_take_liquid'] then
-		meta:set_string("infotext", status.." Off")
+		meta:set_string("infotext", status.." " .. S("Off"))
 		return false
 	end
 
 	local c = srcdef.node_io_can_take_liquid(srcpos, srcnode, "")
 	if not c then
-		meta:set_string("infotext", status.." Off")
-		return false 
+		meta:set_string("infotext", status.." " .. S("Off"))
+		return false
 	end
 
 	local srcmeta = minetest.get_meta(srcpos)
@@ -181,9 +183,9 @@ function fluid_lib.transfer_timer_tick(pos, elapsed)
 	for i = 1, fl_size do
 		buffers[i] = srcdef.node_io_get_liquid_name(srcpos, srcnode, "", i)
 	end
-	if not #buffers then 
-		meta:set_string("infotext", status.."\nNo Source Tank")
-		return true 
+	if not #buffers then
+		meta:set_string("infotext", status.."\n" .. S("No Source Tank"))
+		return true
 	end
 
 	-- Limit the amount of fluid pumped per cycle
@@ -193,9 +195,9 @@ function fluid_lib.transfer_timer_tick(pos, elapsed)
 	-- Transfer some fluid here
 	for _,pos in pairs(targets) do
 		if not vector.equals(pos, srcpos) then
-			
+
 			if pumped >= pcapability then break end
-			
+
 			local destnode = minetest.get_node(pos)
 			local destdef  = minetest.registered_nodes[destnode.name]
 			local pp = nil
@@ -215,28 +217,28 @@ function fluid_lib.transfer_timer_tick(pos, elapsed)
 
 			if pp ~= nil then
 				for bindex,bfluid in pairs(pp) do            -- bfluid = destination fluid name
-					for aindex,afluid in pairs(buffers) do   -- afluid = source fluid name 
-						
-						-- get fluid names for pump status						
+					for aindex,afluid in pairs(buffers) do   -- afluid = source fluid name
+
+						-- get fluid names for pump status
 						local bfluid_des = ""
 						local afluid_des = ""
-						
+
 						if bfluid ~= "" then
-							bfluid_des = minetest.registered_nodes[bfluid].description
+							bfluid_des = fluid_lib.cleanse_node_description(bfluid)
 						end
-						
+
 						if afluid ~= "" then
-							afluid_des = minetest.registered_nodes[afluid].description
-						end						
-						
-						if pumped >= pcapability then 
-							meta:set_string("infotext", status.."\nPumped Max Volume".." "..bfluid_des)
-							break 
+							afluid_des = fluid_lib.cleanse_node_description(afluid)
 						end
-						
-						if (afluid == bfluid or bfluid == "") then -- bfluid = "", empty destiniation					
-							local idef = destdef.node_io_room_for_liquid(pos, destnode, "", afluid, pcapability)	
-							
+
+						if pumped >= pcapability then
+							meta:set_string("infotext", status.."\n".. S("Pumped Max Volume") .." "..bfluid_des)
+							break
+						end
+
+						if (afluid == bfluid or bfluid == "") then -- bfluid = "", empty destiniation
+							local idef = destdef.node_io_room_for_liquid(pos, destnode, "", afluid, pcapability)
+
 							if idef > 0 then
 								local fluidcount = srcdef.node_io_get_liquid_stack(srcpos, srcnode, "", aindex):get_count()
 								local defc = math.min(fluidcount, idef)
@@ -245,17 +247,17 @@ function fluid_lib.transfer_timer_tick(pos, elapsed)
 								if defi and defi.millibuckets > 0 then
 									local lo = destdef.node_io_put_liquid(pos, destnode, "", nil, afluid, defi.millibuckets)
 									pumped = pumped + (defi.millibuckets - lo)
-									meta:set_string("infotext", status.."\nPumping "..afluid_des)
+									meta:set_string("infotext", status.."\n"..S("Pumping").." "..afluid_des)
 									changed = true
 								end
 							else
-								meta:set_string("infotext", status.."\nStandby")
+								meta:set_string("infotext", status.."\n" .. S("Standby"))
 							end
 						end
 					end
 				end
 			else
-				meta:set_string("infotext", status.."\nStandby")	
+				meta:set_string("infotext", status.."\n" .. S("Standby"))
 			end
 
 			if changed then
@@ -264,7 +266,7 @@ function fluid_lib.transfer_timer_tick(pos, elapsed)
 			end
 		end
 	end
-		
+
 	return refresh
 end
 

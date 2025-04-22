@@ -6,6 +6,7 @@ read_globals = {
 
     "mcl_util",
     "node_io",
+    "xcompat",
 
     "Raycast",
     "Settings",
@@ -20,6 +21,7 @@ read_globals = {
     "AreaStore",
 
     "vector",
+
 
     table = {
         fields = {
@@ -89,6 +91,7 @@ globals = {
           "comma_value",
           "cleanse_node_name",
           "register_liquid",
+          "empty_buffer",
           "get_empty_bucket",
           "get_liquid_list",
           "get_flowing_for_source",

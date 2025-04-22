@@ -1,3 +1,5 @@
+local S = core.get_translator("fluid_lib")
+
 -- Nodes for transferring fluids
 -- All units are in millibuckets (1 bucket)
 
@@ -37,7 +39,7 @@ function fluid_lib.register_extractor_node(nodename, nodedef)
 
 	nodedef.on_punch = function (pos, node, puncher, pointed_thing)
 		minetest.get_node_timer(pos):start(1.0)
-		minetest.chat_send_player(puncher:get_player_name(),"Pump Started")
+		minetest.chat_send_player(puncher:get_player_name(), S("Pump Started"))
 		minetest.node_punch(pos, node, puncher, pointed_thing)
 	end
 

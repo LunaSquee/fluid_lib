@@ -2,12 +2,15 @@
 -- Copyright (c) 2018 Evert "Diamond" Prants <evert@lunasqu.ee>
 
 local modpath = minetest.get_modpath(minetest.get_current_modname())
+local S = core.get_translator("fluid_lib")
 
 fluid_lib = rawget(_G, "fluid_lib") or {}
 fluid_lib.modpath = modpath
 
-fluid_lib.unit = "mB"
-fluid_lib.unit_description = "milli-bucket"
+fluid_lib.unit = S("mB")
+fluid_lib.unit_description = S("milli-bucket")
+
+fluid_lib.empty_buffer = S("Empty")
 
 fluid_lib.fluid_name_cache = {}
 fluid_lib.fluid_description_cache = {}
@@ -38,7 +41,8 @@ function fluid_lib.cleanse_node_description(node)
 		desc_no_translation = desc_no_translation:match("[)]([%w%s]+)\27")
 	end
 
-	local no_source = desc_no_translation:gsub("(%s?Source%s?)", "")
+	local translated_name = ndef._fluid_name or ndef._doc_items_entry_name
+	local no_source = translated_name or desc_no_translation:gsub("(%s?Source%s?)", "")
 
 	fluid_lib.fluid_description_cache[node] = no_source
 	return no_source
