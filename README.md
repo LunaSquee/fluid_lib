@@ -87,6 +87,9 @@ All numbers are in **milli-buckets** (1 bucket = 1000 mB).
 * `fluid_lib.get_flowing_for_source(source)`
   * Get the flowing variant of a liquid
 
+* `fluid_lib.get_source_for_flowing(source)`
+  * Get the source of a flowing liquid
+
 * `fluid_lib.get_bucket_for_source(source)`
   * Get the bucket item name for a source node
 

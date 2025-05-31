@@ -59,6 +59,25 @@ function fluid_lib.get_flowing_for_source(source)
     return nil
 end
 
+function fluid_lib.get_source_for_flowing(flowing)
+    if bucketmod ~= nil or mesecraft ~= nil then
+        local global_bucket = get_bucket_global()
+        for source, data in pairs(global_bucket.liquids) do
+            if data.flowing == flowing then
+                return data.source or source
+            end
+        end
+    end
+
+    local hack_replace = string.gsub(flowing, "_flowing", "_source")
+    if core.registered_nodes[hack_replace] ~= nil then return hack_replace end
+
+    local hack_remove = string.gsub(flowing, "_flowing", "")
+    if core.registered_nodes[hack_remove] ~= nil then return hack_remove end
+
+    return nil
+end
+
 function fluid_lib.get_bucket_for_source(source)
     if bucketmod ~= nil or mesecraft ~= nil then
         local global_bucket = get_bucket_global()
