@@ -50,8 +50,11 @@ function fluid_lib.get_flowing_for_source(source)
         end
     end
 
-    local hack = source .. "_flowing"
-    if core.registered_nodes[hack] ~= nil then return hack end
+    local hack_append = source .. "_flowing"
+    if core.registered_nodes[hack_append] ~= nil then return hack_append end
+
+    local hack_replace = string.gsub(source, "_source", "_flowing")
+    if core.registered_nodes[hack_replace] ~= nil then return hack_replace end
 
     return nil
 end
