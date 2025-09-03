@@ -172,17 +172,17 @@ function fluid_lib.transfer_timer_tick(pos, elapsed)
 		return false
 	end
 
-	local c = srcdef.node_io_can_take_liquid(srcpos, srcnode, "")
+	local c = srcdef.node_io_can_take_liquid(srcpos, srcnode, "N")
 	if not c then
 		meta:set_string("infotext", status.." " .. S("Off"))
 		return false
 	end
 
 	local srcmeta = minetest.get_meta(srcpos)
-	local fl_size = srcdef.node_io_get_liquid_size(srcpos, srcnode, "")
+	local fl_size = srcdef.node_io_get_liquid_size(srcpos, srcnode, "N")
 	local buffers = {}
 	for i = 1, fl_size do
-		buffers[i] = srcdef.node_io_get_liquid_name(srcpos, srcnode, "", i)
+		buffers[i] = srcdef.node_io_get_liquid_name(srcpos, srcnode, "N", i)
 	end
 	if not #buffers then
 		meta:set_string("infotext", status.."\n" .. S("No Source Tank"))
@@ -287,5 +287,9 @@ minetest.register_lbm({
     name = "fluid_transfer:fluid_transfer_tick",
     nodenames = {"group:fluid_transport_source", "group:fluid_pump"},
     run_at_every_load = true,
-    action = fluid_lib.refresh_node,
+    action = function (pos)
+			core.after(0.5, function()
+				fluid_lib.refresh_node(pos)
+			end)
+		end,
 })
