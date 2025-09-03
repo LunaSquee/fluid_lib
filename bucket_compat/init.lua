@@ -182,7 +182,7 @@ local function mcl_extra_check(pos, placer, source)
 
     if usedef[defpref .. 'can_put_liquid'] and
         usedef[defpref .. 'can_put_liquid'](ppos, buffer_node, lookat, source,
-                                            1000) then
+                                            1000) >= 1000 then
         usedef[defpref .. 'put_liquid'](ppos, buffer_node, lookat, placer,
                                         source, 1000)
         if ndef.on_timer then
@@ -292,7 +292,7 @@ if bucketmod ~= nil or mesecraft ~= nil then
 
                 if usedef[defpref .. 'can_put_liquid'] and
                     usedef[defpref .. 'can_put_liquid'](ppos, buffer_node,
-                                                        lookat, source, 1000) then
+                                                        lookat, source, 1000) >= 1000 then
                     usedef[defpref .. 'put_liquid'](ppos, buffer_node, lookat,
                                                     user, source, 1000)
                     if ndef.on_timer then

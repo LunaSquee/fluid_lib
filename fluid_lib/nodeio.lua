@@ -29,7 +29,7 @@ local nodeiodef = {
 	end,
 		-- if false, transfer node should only put and take in 1000 increments
 		-- inventory nodes that don't accept milibuckets should:
-			-- return false in node_io_can_put_liquid() if non-1000 increment
+			-- return 0 in node_io_can_put_liquid() if non-1000 increment
 			-- return millibuckets parameter in node_io_put_liquid() if non-1000 increment
 			-- only return upto a 1000 increment in node_io_take_liquid()
 		-- transfer nodes that can put non-1000 increments should always check this or the inventory node might pretend to be full
