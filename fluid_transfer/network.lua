@@ -3,7 +3,7 @@ local S = core.get_translator("fluid_lib")
 
 -- Network graphs are built eminating from provider nodes.
 -- TODO: Caching
--- TODO: replace "back" side with the actual side
+-- TODO: replace "N" side with the actual side
 
 ---------------------
 -- Graph Functions --
@@ -74,7 +74,7 @@ local function check_node(targets, all_nodes, pos, p_pos, pnodeid, queue)
 		return
 	end
 
-	if not ndef['node_io_can_put_liquid'] or not ndef['node_io_can_put_liquid'](pos, node, "back") then
+	if not ndef['node_io_can_put_liquid'] or not ndef['node_io_can_put_liquid'](pos, node, "N") then
 		return
 	end
 
@@ -106,7 +106,7 @@ local function fluid_targets(p_pos, pos)
 	local ndef = minetest.registered_nodes[node.name]
 	if ndef and minetest.get_item_group(node.name, "fluid_transport") > 0 then
 		add_duct_node(all_nodes, pos, pnodeid, queue)
-	elseif ndef and ndef['node_io_can_put_liquid'] and ndef['node_io_can_put_liquid'](pos, node, "back") then
+	elseif ndef and ndef['node_io_can_put_liquid'] and ndef['node_io_can_put_liquid'](pos, node, "N") then
 		queue = {p_pos}
 	end
 
@@ -141,7 +141,7 @@ function fluid_lib.transfer_timer_tick(pos, elapsed)
 	local tnode = minetest.get_node(tpos)
 	local ndef  = minetest.registered_nodes[tnode.name]
 	if minetest.get_item_group(tnode.name, "fluid_transport") == 0 and
-		(not ndef or not ndef['node_io_can_put_liquid'] or not ndef['node_io_can_put_liquid'](tpos, tnode, "back")) then
+		(not ndef or not ndef['node_io_can_put_liquid'] or not ndef['node_io_can_put_liquid'](tpos, tnode, "N")) then
 		minetest.forceload_free_block(pos)
 		return
 	end
@@ -204,11 +204,11 @@ function fluid_lib.transfer_timer_tick(pos, elapsed)
 			local pp = nil
 
 			if destdef and destdef['node_io_can_put_liquid'] then
-				if destdef.node_io_can_put_liquid(pos, destnode, "back") then
+				if destdef.node_io_can_put_liquid(pos, destnode, "N") then
 					pp = {}
-					local fl_size = destdef.node_io_get_liquid_size(pos, destnode, "back")
+					local fl_size = destdef.node_io_get_liquid_size(pos, destnode, "N")
 					for i = 1, fl_size do
-						pp[i] = destdef.node_io_get_liquid_name(pos, destnode, "back", i)
+						pp[i] = destdef.node_io_get_liquid_name(pos, destnode, "N", i)
 					end
 					if #pp == 0 then pp = nil end
 				end
@@ -238,15 +238,15 @@ function fluid_lib.transfer_timer_tick(pos, elapsed)
 						end
 
 						if (afluid == bfluid or bfluid == "") then -- bfluid = "", empty destiniation
-							local idef = destdef.node_io_can_put_liquid(pos, destnode, "back", afluid, pcapability)
+							local idef = destdef.node_io_can_put_liquid(pos, destnode, "N", afluid, pcapability)
 
 							if idef > 0 then
-								local fluidcount = srcdef.node_io_get_liquid_stack(srcpos, srcnode, "back", aindex):get_count()
+								local fluidcount = srcdef.node_io_get_liquid_stack(srcpos, srcnode, "N", aindex):get_count()
 								local defc = math.min(fluidcount, idef)
-								local defi = srcdef.node_io_take_liquid(srcpos, srcnode, "back", nil, afluid, defc)
+								local defi = srcdef.node_io_take_liquid(srcpos, srcnode, "N", nil, afluid, defc)
 
 								if defi and defi.millibuckets > 0 then
-									local lo = destdef.node_io_put_liquid(pos, destnode, "back", nil, afluid, defi.millibuckets)
+									local lo = destdef.node_io_put_liquid(pos, destnode, "N", nil, afluid, defi.millibuckets)
 									pumped = pumped + (defi.millibuckets - lo)
 									meta:set_string("infotext", status.."\n"..S("Pumping").." "..afluid_des)
 									changed = true
