@@ -33,13 +33,17 @@ minetest.register_node("fluid_transfer:fluid_trash", {
 	groups = {oddly_breakable_by_hand = 1, cracky = 1, fluid_container = 1},
 	_mcl_blast_resistance = 1,
 	_mcl_hardness = 2,
-	node_io_can_put_liquid = function (pos, node, side)
-		return true
+	node_io_can_put_liquid = function (pos, node, side, liquid, millibuckets)
+		if liquid == nil and not millibuckets then
+			return true
+		end
+		return millibuckets
 	end,
 	node_io_accepts_millibuckets = function(pos, node, side) return true end,
 	node_io_put_liquid = function(pos, node, side, putter, liquid, millibuckets)
 		return 0
 	end,
+	-- TODO: remove this after updates have propagated
 	node_io_room_for_liquid = function(pos, node, side, liquid, millibuckets)
 		return millibuckets
 	end,

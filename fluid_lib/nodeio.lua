@@ -1,15 +1,35 @@
 
 -- Node IO System
 local nodeiodef = {
-	node_io_can_put_liquid = function (pos, node, side)
-		return minetest.get_item_group(node.name, 'fluid_container') > 0
+	-- use millibuckets=1 to check if not full, then call put_liquid() with actual amount to transfer
+	-- use millibuckets=1000 with can_put_liquid() and put_liquid() to only insert full buckets
+	node_io_can_put_liquid = function (pos, node, side, liquid, millibuckets)
+		local is_container = minetest.get_item_group(node.name, 'fluid_container') > 0
+		if liquid == nil and not millibuckets then
+			return is_container
+		end
+
+		if not is_container then
+			return 0
+		end
+
+		local buffers = fluid_lib.get_node_buffers(pos)
+		local insertable = 0
+		for buffer,data in pairs(buffers) do
+			local insert = fluid_lib.can_insert_into_buffer(pos, buffer, liquid, millibuckets)
+			if insert > 0 then
+				insertable = insert
+				break
+			end
+		end
+		return insertable
 	end,
 	node_io_can_take_liquid = function (pos, node, side)
 		return minetest.get_item_group(node.name, 'fluid_container') > 0
 	end,
 		-- if false, transfer node should only put and take in 1000 increments
 		-- inventory nodes that don't accept milibuckets should:
-			-- return zero in node_io_room_for_liquid() if non-1000 increment
+			-- return false in node_io_can_put_liquid() if non-1000 increment
 			-- return millibuckets parameter in node_io_put_liquid() if non-1000 increment
 			-- only return upto a 1000 increment in node_io_take_liquid()
 		-- transfer nodes that can put non-1000 increments should always check this or the inventory node might pretend to be full
@@ -28,6 +48,7 @@ local nodeiodef = {
 		-- returns millibuckets if inventory can hold entire amount, else returns amount the inventory can hold
 		-- use millibuckets=1 to check if not full, then call put_liquid() with actual amount to transfer
 		-- use millibuckets=1000 with room_for_liquid() and put_liquid() to only insert full buckets
+	-- TODO: remove this after updates have propagated
 	node_io_room_for_liquid = function(pos, node, side, liquid, millibuckets)
 		local buffers = fluid_lib.get_node_buffers(pos)
 		local insertable = 0

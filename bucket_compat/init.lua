@@ -181,17 +181,14 @@ local function mcl_extra_check(pos, placer, source)
     end
 
     if usedef[defpref .. 'can_put_liquid'] and
-        usedef[defpref .. 'can_put_liquid'](ppos, buffer_node, lookat) then
-        if usedef[defpref .. 'room_for_liquid'](ppos, buffer_node, lookat,
-                                                source, 1000) >= 1000 then
-            usedef[defpref .. 'put_liquid'](ppos, buffer_node, lookat, placer,
-                                            source, 1000)
-            if ndef.on_timer then
-                minetest.get_node_timer(ppos):start(
-                    ndef.node_timer_seconds or 1.0)
-            end
-            place = false
+        usedef[defpref .. 'can_put_liquid'](ppos, buffer_node, lookat, source,
+                                            1000) then
+        usedef[defpref .. 'put_liquid'](ppos, buffer_node, lookat, placer,
+                                        source, 1000)
+        if ndef.on_timer then
+            minetest.get_node_timer(ppos):start(ndef.node_timer_seconds or 1.0)
         end
+        place = false
     end
 
     return place, true
@@ -295,19 +292,14 @@ if bucketmod ~= nil or mesecraft ~= nil then
 
                 if usedef[defpref .. 'can_put_liquid'] and
                     usedef[defpref .. 'can_put_liquid'](ppos, buffer_node,
-                                                        lookat) then
-                    if usedef[defpref .. 'room_for_liquid'](ppos, buffer_node,
-                                                            lookat, source, 1000) >=
-                        1000 then
-                        usedef[defpref .. 'put_liquid'](ppos, buffer_node,
-                                                        lookat, user, source,
-                                                        1000)
-                        if ndef.on_timer then
-                            minetest.get_node_timer(ppos):start(
-                                ndef.node_timer_seconds or 1.0)
-                        end
-                        place = false
+                                                        lookat, source, 1000) then
+                    usedef[defpref .. 'put_liquid'](ppos, buffer_node, lookat,
+                                                    user, source, 1000)
+                    if ndef.on_timer then
+                        minetest.get_node_timer(ppos):start(
+                            ndef.node_timer_seconds or 1.0)
                     end
+                    place = false
                 end
 
                 if place then
