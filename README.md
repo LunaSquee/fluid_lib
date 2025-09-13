@@ -23,7 +23,7 @@ This mod also provides an attempt to unify bucket mods from different games, cur
 
 4. Register your node **(DO NOT MISS THIS STEP! TRANSFER WILL NOT WORK OTHERWISE!)**.
 
-Just call `fluid_lib.register_node(nodename)`.
+Just call `fluid_lib.register_node(nodename)`. You can skip this step only if you implement the [node_io callbacks](fluid_lib/fluid_lib/nodeio.lua) by yourself.
 
 ## API
 All numbers are in **milli-buckets** (1 bucket = 1000 mB).
@@ -35,11 +35,11 @@ All numbers are in **milli-buckets** (1 bucket = 1000 mB).
 	* Returns all the information about this buffer.
 ```
     {
-        fluid     = fluid source block,
-        amount    = amount of fluid,
-        accepts   = list of accepted fluids,
-        capacity  = capacity of the buffer,
-        drainable = is this buffer drainable,
+        fluid     = fluid source block (string),
+        amount    = amount of fluid (number),
+        accepts   = list of accepted fluids (table),
+        capacity  = capacity of the buffer (number),
+        drainable = is this buffer drainable (boolean),
     }
 ```
 
@@ -63,7 +63,7 @@ All numbers are in **milli-buckets** (1 bucket = 1000 mB).
   * Example: "Water (1,000 / 1,000 mB)"
 
 * `fluid_lib.register_node(nodename)`
-	* Registers a node that has fluid buffers. This is IMPORTANT!
+	* Registers a node that has fluid buffers. This is important unless you wish to implement the [node_io callbacks](fluid_lib/fluid_lib/nodeio.lua) by yourself.
 
 * `fluid_lib.register_extractor_node(nodename, nodedef)`
 	* Registers a node that can extract fluid from another node (in front of self) and put it into ducts.

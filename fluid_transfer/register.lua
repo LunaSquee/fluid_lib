@@ -43,10 +43,6 @@ minetest.register_node("fluid_transfer:fluid_trash", {
 	node_io_put_liquid = function(pos, node, side, putter, liquid, millibuckets)
 		return 0
 	end,
-	-- TODO: remove this after updates have propagated
-	node_io_room_for_liquid = function(pos, node, side, liquid, millibuckets)
-		return millibuckets
-	end,
 	node_io_get_liquid_size = function (pos, node, side)
 		return 1
 	end,

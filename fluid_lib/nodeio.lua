@@ -45,23 +45,6 @@ local nodeiodef = {
 		end
 		return leftovers
 	end,
-		-- returns millibuckets if inventory can hold entire amount, else returns amount the inventory can hold
-		-- use millibuckets=1 to check if not full, then call put_liquid() with actual amount to transfer
-		-- use millibuckets=1000 with room_for_liquid() and put_liquid() to only insert full buckets
-	-- TODO: remove this after updates have propagated
-	node_io_room_for_liquid = function(pos, node, side, liquid, millibuckets)
-		local buffers = fluid_lib.get_node_buffers(pos)
-		local insertable = 0
-		for buffer,data in pairs(buffers) do
-			local insert = fluid_lib.can_insert_into_buffer(pos, buffer, liquid, millibuckets)
-			if insert > 0 then
-				insertable = insert
-				break
-			end
-		end
-		return insertable
-	end,
-	
 		-- returns {name:string, millibuckets:int} with <= want_millibuckets or nil if inventory is empty or doesn't have want_liquid
 		-- want_liquid should be the name of a source liquid (in bucket.liquids of bucket mod)
 	node_io_take_liquid = function(pos, node, side, taker, want_liquid, want_millibuckets)
@@ -79,7 +62,7 @@ local nodeiodef = {
 		end
 		return {name = name, millibuckets = took}
 	end,
-	
+
 	node_io_get_liquid_size = function (pos, node, side)
 		-- this is always 1 unless inventory can hold multiple liquid types
 		local cnt = 0
