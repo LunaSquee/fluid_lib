@@ -107,7 +107,7 @@ local function create_tank_node(tankname, def, fluid_name)
 		cracky = 3,
 		pickaxey = 1,
 		handy = 1,
-		oddly_breakable_by_hand = 3,
+		oddly_breakable_by_hand = 1,
 		fluid_container = 1
 	}
 
