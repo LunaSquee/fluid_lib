@@ -103,7 +103,13 @@ local function create_tank_node(tankname, def, fluid_name)
 	local srcnode    = def.srcnode or nil
 	local accepts    = def.accepts or true
 
-	local groups = {cracky = 1, oddly_breakable_by_hand = 3, fluid_container = 1}
+	local groups = {
+		cracky = 3,
+		pickaxey = 1,
+		handy = 1,
+		oddly_breakable_by_hand = 3,
+		fluid_container = 1
+	}
 
 	if srcnode then
 		groups["not_in_creative_inventory"] = 1

@@ -6,7 +6,12 @@ fluid_lib.register_extractor_node("fluid_transfer:fluid_transfer_pump", {
 	use_texture_alpha = "clip",
 	drawtype = "mesh",
 	mesh = "fluid_transfer_pump.obj",
-	groups = {oddly_breakable_by_hand = 1, cracky = 1},
+	groups = {
+		oddly_breakable_by_hand = 1,
+		cracky = 3,
+		pickaxey = 1,
+		handy = 1
+	},
 	paramtype = "light",
 	selection_box = {
 		type = "fixed",
@@ -21,7 +26,12 @@ fluid_lib.register_transfer_node("fluid_transfer:fluid_duct", {
 	description = S("Fluid Duct"),
 	tiles = {"fluid_transfer_duct.png"},
 	use_texture_alpha = "clip",
-	groups = {oddly_breakable_by_hand = 1, cracky = 1}
+	groups = {
+		oddly_breakable_by_hand = 1,
+		cracky = 3,
+		pickaxey = 1,
+		handy = 1
+	}
 })
 
 minetest.register_node("fluid_transfer:fluid_trash", {
@@ -30,7 +40,13 @@ minetest.register_node("fluid_transfer:fluid_trash", {
 	mesh = "fluid_transfer_trash.obj",
 	tiles = {"fluid_transfer_trash.png"},
 	use_texture_alpha = "clip",
-	groups = {oddly_breakable_by_hand = 1, cracky = 1, fluid_container = 1},
+	groups = {
+		oddly_breakable_by_hand = 1,
+		cracky = 3,
+		pickaxey = 1,
+		handy = 1,
+		fluid_container = 1
+	},
 	_mcl_blast_resistance = 1,
 	_mcl_hardness = 2,
 	node_io_can_put_liquid = function (pos, node, side, liquid, millibuckets)
