@@ -328,7 +328,7 @@ if bucketmod ~= nil or mesecraft ~= nil then
 
             local lpos = pointed_thing.under
             local node = minetest.get_node_or_nil(lpos)
-            local ndef = node and minetest.registered_nodes[node.name]
+            local ndef = minetest.registered_nodes[node.name]
 
             -- Call on_rightclick if the pointed node defines it
             if ndef and ndef.on_rightclick and
@@ -337,6 +337,10 @@ if bucketmod ~= nil or mesecraft ~= nil then
                 return ndef.on_rightclick(lpos, node, user, itemstack)
             end
 
+            local node_name = "ignore"
+            if node then
+              node_name = node.name
+            end
             if check_protection(lpos, user and user:get_player_name() or "",
                                 "take " .. node.name) then return end
 
