@@ -135,7 +135,7 @@ local function create_tank_node(tankname, def, fluid_name)
 
 	minetest.register_node(tankname, {
 		description = desc,
-		drawtype = "glasslike_framed_optional",
+		drawtype = "glasslike_framed",
 		paramtype = "light",
 		paramtype2 = "glasslikeliquidlevel",
 		is_ground_content = false,
