@@ -337,8 +337,9 @@ if bucketmod ~= nil or mesecraft ~= nil then
                 return ndef.on_rightclick(lpos, node, user, itemstack)
             end
 
+            local node_name = node and node.name or "unknown"
             if check_protection(lpos, user and user:get_player_name() or "",
-                                "take " .. node.name) then return end
+                                "take " .. node_name) then return end
 
             -- Node IO Support
             local usedef = ndef
