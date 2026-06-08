@@ -20,7 +20,7 @@ function fluid_lib.get_buffer_data(pos, buffer)
 	local node, nodedef = node_data(pos)
 	local buffers = fluid_lib.get_node_buffers(pos)
 
-	if not node or not buffers[buffer] then
+	if not node or not buffers or not buffers[buffer] then
 		return nil
 	end
 
